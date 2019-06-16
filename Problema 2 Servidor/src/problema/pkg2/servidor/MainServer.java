@@ -3,33 +3,24 @@ package problema.pkg2.servidor;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
-public class Battleships extends javax.swing.JFrame {
+public class MainServer extends javax.swing.JFrame {
     JPanelMain jm;
-    InsertShips is;
     ActionController ac;
-    EndGameData eg;
-    Server s;
+    Server server;
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Battleships() {
+    public MainServer() {
         super("Batalha Naval");
         initComponents();
         jm = new JPanelMain();
-        is = new InsertShips();
-        s = new Server();
-        eg = new EndGameData();
-        this.getContentPane().add(is);
-        this.is.move(640, 100);
+        server = new Server();
         this.getContentPane().add(jm);
         
         ac = new ActionController(this);
         
-        is.jButton1.addActionListener(ac);
-        is.jButton2.addActionListener(ac);
-        is.jButton3.addActionListener(ac);
-        for (int i = 1; i <= 10; i++) 
-            for (int j = 1; j <= 10; j++)
-                jm.s.array[i][j].addActionListener(ac);
+        jm.jButton2.addActionListener(ac);
+        jm.jButton4.addActionListener(ac);
+        jm.jButton5.addActionListener(ac);
     }
     
     
@@ -52,10 +43,10 @@ public class Battleships extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
+            .addGap(0, 400, Short.MAX_VALUE)
         );
 
-        setBounds(0, 0, 1296, 639);
+        setBounds(0, 0, 1296, 439);
     }// </editor-fold>//GEN-END:initComponents
 
     /**
@@ -76,8 +67,14 @@ public class Battleships extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Battleships.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainServer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
         
@@ -85,81 +82,40 @@ public class Battleships extends javax.swing.JFrame {
         //</editor-fold>
         
         /* Create and display the form */
-        Battleships b = new Battleships();
+        MainServer main = new MainServer();
         java.awt.EventQueue.invokeLater(() -> {
-            b.setVisible(true);
+            main.setVisible(true);
         });
         
         /*
          * inicializando o servidor e recebendo dados do cliente fora da thread da interface gráfica
          * para que a mesma não seja afetada pelo processo demorado de recebimento de dados
          */
-        b.s.startRunning();
+        main.server.startRunning();
         
         try{
             //inserindo os navios inimigos no mapa assim que os dados forem recebidos
-            b.setShipsC();
-            b.ac.showMessage("\nAdversário Conectado!");
+            main.ac.showMessage("\nVocês estão conectados!");
             //e inicializa o campo do adversário
-            b.jm.c.controlField(true);
-            for (int i = 1; i <= 10; i++) 
-                for (int j = 1; j <= 10; j++) 
-                    b.jm.c.array[i][j].addActionListener(b.ac);
-            b.clientAction();
+            main.clientAction(main);
         }catch(IOException | ClassNotFoundException ex){
-            b.ac.showMessage("\n\nEncerrando conexões...");
+            main.ac.showMessage("\n\nEncerrando conexões...");
         }
     }
     
     @SuppressWarnings("InfiniteRecursion")
-    private void clientAction() throws IOException, ClassNotFoundException{
-        String str,aux = "N";
-        str = s.receiveData();
+    private void clientAction(MainServer ms) throws IOException, ClassNotFoundException{
+        String msg;
+        msg = server.receiveData();
+        
         //espera até que o cliente receba os dados para encerrar o programa
-        if (str.equals("end"))
+        if (msg.equals("end"))
             throw new IOException();
         //str recebe os dados do cliente
-        StringTokenizer st = new StringTokenizer(str);
-        //converte as posições recebidas para Inteiro
-        int si = Integer.parseInt(st.nextToken());
-        int sj = Integer.parseInt(st.nextToken());
-        //verifica se o cliente acertou
-        str = ac.hitShipsS(si,sj);
-        //e envia os dados para o cliente
-        s.sendData(str + " " + aux);
-        /*
-         * chama o método novamente indefinidamente
-         * sendo parado somente quando o jogo terminar
-         */
-        clientAction();
-    }
-    
-    private void setShipsC() throws IOException, ClassNotFoundException{
-        String shipsPos = s.receiveData();
-        int pos,sta,end,size;
-        StringTokenizer st = new StringTokenizer(shipsPos);
-        while(st.hasMoreTokens()){
-            if(st.nextToken().equals("IH")){
-                pos = Integer.parseInt(st.nextToken());
-                sta = Integer.parseInt(st.nextToken());
-                end = Integer.parseInt(st.nextToken());
-                size = (end+1)-sta;
-                for (int i = sta; i <= end; i++){
-                    jm.c.m.getStatus()[i][pos].setStatusC(1);
-                    jm.c.m.getStatus()[i][pos].addBoat(size);
-                }
-            }else{
-                pos = Integer.parseInt(st.nextToken());
-                sta = Integer.parseInt(st.nextToken());
-                end = Integer.parseInt(st.nextToken());
-                size = (end+1)-sta;
-                for (int i = sta; i <= end; i++){
-                    jm.c.m.getStatus()[pos][i].setStatusC(1);
-                    jm.c.m.getStatus()[pos][i].addBoat(size);
-                }
-            }
-            jm.c.m.setRest(size);
-        }
+        
+        new ActionController(ms).showMessage("\nO outro diz:\n" + msg);
+        
+        clientAction(ms);
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
