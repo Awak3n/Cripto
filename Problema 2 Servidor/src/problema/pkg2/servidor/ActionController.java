@@ -34,8 +34,8 @@ public class ActionController implements ActionListener, ItemListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == main.jm.jButton2){
-            String txt = main.jm.jTextArea4.getText();
-            main.server.sendData(main.jm.jTextArea3.getText());
+            String txt = main.jm.jTextArea3.getText();
+            main.server.sendData(txt);
             showMessage("\nVocê diz:\n" + txt);
         } else if(e.getSource() == main.jm.jButton4){
             try {
@@ -100,7 +100,8 @@ public class ActionController implements ActionListener, ItemListener{
         if(modo.equals("CBC") || modo.equals("ECB")){
             c.init(Cipher.ENCRYPT_MODE, key);
         }else{
-            byte[] ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
+            byte[] ivBytes;
+            ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
             IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
             c.init(Cipher.ENCRYPT_MODE, key, ivSpec);
         }
