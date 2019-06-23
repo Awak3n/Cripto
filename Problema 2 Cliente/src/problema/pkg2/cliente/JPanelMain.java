@@ -152,7 +152,7 @@ public class JPanelMain extends javax.swing.JPanel {
         add(jComboBox1);
         jComboBox1.setBounds(430, 330, 110, 30);
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Cesar", "Vigenère", "One-Time Pad", "Playflair", "Hill" }));
         add(jComboBox2);
         jComboBox2.setBounds(310, 330, 110, 30);
     }// </editor-fold>//GEN-END:initComponents
