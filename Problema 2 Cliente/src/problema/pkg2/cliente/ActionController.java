@@ -5,9 +5,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +18,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JOptionPane;
 import sun.misc.BASE64Decoder;
@@ -54,6 +58,10 @@ public class ActionController implements ActionListener, ItemListener{
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchProviderException ex) {
+                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidAlgorithmParameterException ex) {
+                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if(e.getSource() == main.jm.jButton5){
             try {
@@ -69,6 +77,10 @@ public class ActionController implements ActionListener, ItemListener{
             } catch (BadPaddingException ex) {
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
+                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchProviderException ex) {
+                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidAlgorithmParameterException ex) {
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -87,26 +99,42 @@ public class ActionController implements ActionListener, ItemListener{
         }  
     }
     
-    private String getEncript(byte[] keyValue, String modo, String tipo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, IOException, IOException{
-        Cipher c = Cipher.getInstance(modo);
+    private String getEncript(byte[] keyValue, String modo, String tipo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, IOException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException{
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Cipher c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "BC");
         Key key = new SecretKeySpec(keyValue,tipo);
-        c.init(Cipher.ENCRYPT_MODE, key);
+        if(modo.equals("CBC") || modo.equals("ECB")){
+            c.init(Cipher.ENCRYPT_MODE, key);
+        }else{
+            byte[] ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
+            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+            c.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+        }
+        byte[] cipherText = new byte[c.getOutputSize(main.jm.jTextArea4.getText().getBytes().length)];
+        System.out.println(new String(cipherText));
         byte[] encVal = c.doFinal(main.jm.jTextArea4.getText().getBytes());
         String encryptedValue = new BASE64Encoder().encode(encVal);
         return encryptedValue;
     }
     
-    private String getDecript(byte[] keyValue, String modo, String tipo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException{
-        Cipher c = Cipher.getInstance(modo);
+    private String getDecript(byte[] keyValue, String modo, String tipo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException{
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Cipher c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "BC");
         Key key = new SecretKeySpec(keyValue,tipo);
-        c.init(Cipher.DECRYPT_MODE, key);
+        if(modo.equals("ECB")){
+            c.init(Cipher.DECRYPT_MODE, key);
+        }else{
+            byte[] ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
+            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+            c.init(Cipher.DECRYPT_MODE, key, ivSpec);
+        }
         byte[] decordedVal = new BASE64Decoder().decodeBuffer(main.jm.jTextArea4.getText());
-        byte[] decVal = c.doFinal(main.jm.jTextArea4.getText().getBytes());
+        byte[] decVal = c.doFinal(decordedVal);
         String decryptedValue = new String(decVal);
         return decryptedValue;
     }
     
-    private void encriptar() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException{
+    private void encriptar() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException{
         String text = "";
         byte[] keyValue = main.jm.jTextField2.getText().getBytes();
         if(main.jm.jTextArea4.getText() != null && !main.jm.jTextArea4.getText().equals("")){
@@ -121,35 +149,35 @@ public class ActionController implements ActionListener, ItemListener{
             } else if(main.jm.jComboBox2.getSelectedIndex() == 4){
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 0){
-                text = getEncript(keyValue, "DES/ECB/NoPadding", "DES");
+                text = getEncript(keyValue, "ECB", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 1){
-                text = getEncript(keyValue, "DES/CBC/NoPadding", "DES");
+                text = getEncript(keyValue, "CBC", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 2){
-                text = getEncript(keyValue, "DES/CFB/NoPadding", "DES");
+                text = getEncript(keyValue, "CFB", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 3){
-                text = getEncript(keyValue, "DES/OFB/NoPadding", "DES");
+                text = getEncript(keyValue, "OFB", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 4){
-                text = getEncript(keyValue, "DES/CTR/NoPadding", "DES");
+                text = getEncript(keyValue, "CTR", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 0){
-                text = getEncript(keyValue, "DESede/ECB/NoPadding", "DESede");
+                text = getEncript(keyValue, "ECB", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 1){
-                text = getEncript(keyValue, "DESede/CBC/NoPadding", "DESede");
+                text = getEncript(keyValue, "CBC", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 2){
-                text = getEncript(keyValue, "DESede/CFB/NoPadding", "DESede");
+                text = getEncript(keyValue, "CFB", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 3){
-                text = getEncript(keyValue, "DESede/OFB/NoPadding", "DESede");
+                text = getEncript(keyValue, "OFB", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 4){
-                text = getEncript(keyValue, "DESede/CTR/NoPadding", "DESede");
+                text = getEncript(keyValue, "CTR", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 0){
-                text = getEncript(keyValue, "AES/ECB/NoPadding", "AES");
+                text = getEncript(keyValue, "ECB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 1){
-                text = getEncript(keyValue, "AES/CBC/NoPadding", "AES");
+                text = getEncript(keyValue, "CBC", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 2){
-                text = getEncript(keyValue, "AES/CFB/NoPadding", "AES");
+                text = getEncript(keyValue, "CFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 3){
-                text = getEncript(keyValue, "AES/OFB/NoPadding", "AES");
+                text = getEncript(keyValue, "OFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 4){
-                text = getEncript(keyValue, "AES/CTR/NoPadding", "AES");
+                text = getEncript(keyValue, "CTR", "AES");
             }
         //as seguintes linhas servem apenas para testes
             main.jm.jTextArea3.setText(text);
@@ -158,7 +186,7 @@ public class ActionController implements ActionListener, ItemListener{
         }
     }
     
-    private void decriptar() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException{
+    private void decriptar() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException{
         String text = "";
         byte[] keyValue = main.jm.jTextField2.getText().getBytes();
         if(main.jm.jTextArea4.getText() != null && !main.jm.jTextArea4.getText().equals("")){
@@ -173,35 +201,35 @@ public class ActionController implements ActionListener, ItemListener{
             } else if(main.jm.jComboBox2.getSelectedIndex() == 4){
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 0){
-                text = getDecript(keyValue, "DES/ECB/NoPadding", "DES");
+                text = getDecript(keyValue, "ECB", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 1){
-                text = getDecript(keyValue, "DES/CBC/NoPadding", "DES");
+                text = getDecript(keyValue, "CBC", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 2){
-                text = getDecript(keyValue, "DES/CFB/NoPadding", "DES");
+                text = getDecript(keyValue, "CFB", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 3){
-                text = getDecript(keyValue, "DES/OFB/NoPadding", "DES");
+                text = getDecript(keyValue, "OFB", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 4){
-                text = getDecript(keyValue, "DES/CTR/NoPadding", "DES");
+                text = getDecript(keyValue, "CTR", "DES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 0){
-                text = getDecript(keyValue, "DESede/ECB/NoPadding", "DESede");
+                text = getDecript(keyValue, "ECB", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 1){
-                text = getDecript(keyValue, "DESede/CBC/NoPadding", "DESede");
+                text = getDecript(keyValue, "CBC", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 2){
-                text = getDecript(keyValue, "DESede/CFB/NoPadding", "DESede");
+                text = getDecript(keyValue, "CFB", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 3){
-                text = getDecript(keyValue, "DESede/OFB/NoPadding", "DESede");
+                text = getDecript(keyValue, "OFB", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 4){
-                text = getDecript(keyValue, "DESede/CTR/NoPadding", "DESede");
+                text = getDecript(keyValue, "CTR", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 0){
-                text = getDecript(keyValue, "AES/ECB/NoPadding", "AES");
+                text = getDecript(keyValue, "ECB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 1){
-                text = getDecript(keyValue, "AES/CBC/NoPadding", "AES");
+                text = getDecript(keyValue, "CBC", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 2){
-                text = getDecript(keyValue, "AES/CFB/NoPadding", "AES");
+                text = getDecript(keyValue, "CFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 3){
-                text = getDecript(keyValue, "AES/OFB/NoPadding", "AES");
+                text = getDecript(keyValue, "OFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 4){
-                text = getDecript(keyValue, "AES/CTR/NoPadding", "AES");
+                text = getDecript(keyValue, "CTR", "AES");
             }
             main.jm.jTextArea3.setText(text);
             main.jm.jButton2.setEnabled(true);
