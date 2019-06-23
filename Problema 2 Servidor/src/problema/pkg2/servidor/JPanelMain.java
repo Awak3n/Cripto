@@ -185,6 +185,6 @@ public class JPanelMain extends javax.swing.JPanel {
     public javax.swing.JTextArea jTextArea2;
     public javax.swing.JTextArea jTextArea3;
     public javax.swing.JTextArea jTextArea4;
-    private javax.swing.JTextField jTextField2;
+    public javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
 }
