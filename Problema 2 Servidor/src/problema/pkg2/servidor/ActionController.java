@@ -2,9 +2,11 @@ package problema.pkg2.servidor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import javax.swing.JOptionPane;
 
-public class ActionController implements ActionListener{
+public class ActionController implements ActionListener, ItemListener{
     MainServer main;
     
     ActionController(MainServer main){
@@ -22,6 +24,17 @@ public class ActionController implements ActionListener{
         } else if(e.getSource() == main.jm.jButton5){
             decriptar();
         }
+    }
+    
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            if(e.getItem().equals("DES") || e.getItem().equals("3DES") || e.getItem().equals("AES")){
+                main.jm.jComboBox1.setVisible(true);
+            }else{
+                main.jm.jComboBox1.setVisible(false);
+            }
+        }  
     }
     
     private void encriptar(){

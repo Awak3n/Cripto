@@ -21,6 +21,8 @@ public class MainServer extends javax.swing.JFrame {
         jm.jButton2.addActionListener(ac);
         jm.jButton4.addActionListener(ac);
         jm.jButton5.addActionListener(ac);
+        jm.jComboBox1.addItemListener(ac);
+        jm.jComboBox2.addItemListener(ac);
     }
     
     

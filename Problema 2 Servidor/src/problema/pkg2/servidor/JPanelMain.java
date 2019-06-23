@@ -170,8 +170,8 @@ public class JPanelMain extends javax.swing.JPanel {
     public javax.swing.JButton jButton2;
     public javax.swing.JButton jButton4;
     public javax.swing.JButton jButton5;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
+    public javax.swing.JComboBox<String> jComboBox1;
+    public javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     public javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
