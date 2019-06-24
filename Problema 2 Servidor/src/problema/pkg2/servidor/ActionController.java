@@ -95,37 +95,66 @@ public class ActionController implements ActionListener, ItemListener{
     
     private String getEncript(byte[] keyValue, String modo, String tipo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, IOException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException{
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        Cipher c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "BC");
-        Key key = new SecretKeySpec(keyValue,tipo);
-        if(modo.equals("CBC") || modo.equals("ECB")){
-            c.init(Cipher.ENCRYPT_MODE, key);
-        }else{
-            byte[] ivBytes;
-            ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
-            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-            c.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+        Cipher c;
+        byte[] encVal;
+        if(tipo.equals("AES")){
+            c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "SunJCE");
+            SecretKeySpec key = new SecretKeySpec(keyValue, "AES");
+            if(modo.equals("ECB")){
+                c.init(Cipher.ENCRYPT_MODE, key);
+            }else{
+                String IV = "AAAAAAAAAAAAAAAA";
+                c.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
+            }
+            encVal = c.doFinal(main.jm.jTextArea4.getText().getBytes("UTF-8"));
+        } else {
+            c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "BC");
+            Key key = new SecretKeySpec(keyValue,tipo);
+            if(modo.equals("CBC") || modo.equals("ECB")){
+                c.init(Cipher.ENCRYPT_MODE, key);
+            }else{
+                byte[] ivBytes;
+                ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
+                IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+                c.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+            }
+            encVal = c.doFinal(main.jm.jTextArea4.getText().getBytes());
         }
-        byte[] cipherText = new byte[c.getOutputSize(main.jm.jTextArea4.getText().getBytes().length)];
-        System.out.println(new String(cipherText));
-        byte[] encVal = c.doFinal(main.jm.jTextArea4.getText().getBytes());
         String encryptedValue = new BASE64Encoder().encode(encVal);
         return encryptedValue;
     }
     
     private String getDecript(byte[] keyValue, String modo, String tipo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException{
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        Cipher c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "BC");
-        Key key = new SecretKeySpec(keyValue,tipo);
-        if(modo.equals("ECB")){
-            c.init(Cipher.DECRYPT_MODE, key);
-        }else{
-            byte[] ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
-            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-            c.init(Cipher.DECRYPT_MODE, key, ivSpec);
+        Cipher c;
+        byte[] decVal;
+        String decryptedValue;
+        if(tipo.equals("AES")){
+            c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "SunJCE");
+            SecretKeySpec key = new SecretKeySpec(keyValue, "AES");
+            if(modo.equals("ECB")){
+                c.init(Cipher.DECRYPT_MODE, key);
+            }else{
+                String IV = "AAAAAAAAAAAAAAAA";
+                c.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
+            }
+            byte[] decordedVal = new BASE64Decoder().decodeBuffer(main.jm.jTextArea4.getText());
+            decVal = c.doFinal(decordedVal);
+            decryptedValue = new String(decVal,"UTF-8");
+        } else {
+            c = Cipher.getInstance(tipo + "/" + modo + "/PKCS5Padding", "BC");
+            Key key = new SecretKeySpec(keyValue,tipo);
+            if(modo.equals("ECB")){
+                c.init(Cipher.DECRYPT_MODE, key);
+            }else{
+                byte[] ivBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x01 };
+                IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+                c.init(Cipher.DECRYPT_MODE, key, ivSpec);
+            }
+            byte[] decordedVal = new BASE64Decoder().decodeBuffer(main.jm.jTextArea4.getText());
+            decVal = c.doFinal(decordedVal);
+            decryptedValue = new String(decVal);
         }
-        byte[] decordedVal = new BASE64Decoder().decodeBuffer(main.jm.jTextArea4.getText());
-        byte[] decVal = c.doFinal(decordedVal);
-        String decryptedValue = new String(decVal);
         return decryptedValue;
     }
     
@@ -164,14 +193,19 @@ public class ActionController implements ActionListener, ItemListener{
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 4){
                 text = getEncript(keyValue, "CTR", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 0){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getEncript(keyValue, "ECB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 1){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getEncript(keyValue, "CBC", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 2){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getEncript(keyValue, "CFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 3){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getEncript(keyValue, "OFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 4){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getEncript(keyValue, "CTR", "AES");
             }
         //as seguintes linhas servem apenas para testes
@@ -216,14 +250,19 @@ public class ActionController implements ActionListener, ItemListener{
             } else if(main.jm.jComboBox2.getSelectedIndex() == 6 && main.jm.jComboBox1.getSelectedIndex() == 4){
                 text = getDecript(keyValue, "CTR", "DESede");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 0){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getDecript(keyValue, "ECB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 1){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getDecript(keyValue, "CBC", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 2){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getDecript(keyValue, "CFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 3){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getDecript(keyValue, "OFB", "AES");
             } else if(main.jm.jComboBox2.getSelectedIndex() == 7 && main.jm.jComboBox1.getSelectedIndex() == 4){
+                keyValue = main.jm.jTextField2.getText().getBytes("UTF-8");
                 text = getDecript(keyValue, "CTR", "AES");
             }
             main.jm.jTextArea3.setText(text);
