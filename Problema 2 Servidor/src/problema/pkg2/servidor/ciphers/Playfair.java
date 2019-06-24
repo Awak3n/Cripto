@@ -5,7 +5,7 @@ import java.awt.Point;
 /**
  *
  * @author Gabriel
- * Source: Rosetta Code
+ * Source: Rosetta Code (adaptado)
  */
 public class Playfair {
     private static char[][] charTable;

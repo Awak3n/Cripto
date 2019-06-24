@@ -3,7 +3,7 @@ package problema.pkg2.servidor.ciphers;
 /**
  *
  * @author Gabriel
- * Source: Rosetta Code
+ * Source: Rosetta Code (adaptado)
  */
 public class Vigenere {
     public static String Encrypt(String text, String key) {
