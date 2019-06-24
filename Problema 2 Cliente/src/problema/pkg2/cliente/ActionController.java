@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.StringTokenizer;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -16,9 +16,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import javax.swing.JOptionPane;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import java.util.Base64;
+import problema.pkg2.cliente.ciphers.*;
 
 public class ActionController implements ActionListener, ItemListener{
     MainClient main;
@@ -42,33 +41,13 @@ public class ActionController implements ActionListener, ItemListener{
         } else if(e.getSource() == main.jm.jButton4){
             try {
                 encriptar();
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchPaddingException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvalidKeyException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalBlockSizeException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (BadPaddingException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if(e.getSource() == main.jm.jButton5){
             try {
                 decriptar();
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchPaddingException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvalidKeyException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalBlockSizeException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (BadPaddingException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -91,8 +70,10 @@ public class ActionController implements ActionListener, ItemListener{
         Cipher c = Cipher.getInstance(modo);
         Key key = new SecretKeySpec(keyValue,tipo);
         c.init(Cipher.ENCRYPT_MODE, key);
+        
         byte[] encVal = c.doFinal(main.jm.jTextArea4.getText().getBytes());
-        String encryptedValue = new BASE64Encoder().encode(encVal);
+        
+        String encryptedValue = Arrays.toString(Base64.getEncoder().encode(encVal));
         return encryptedValue;
     }
     
@@ -100,25 +81,35 @@ public class ActionController implements ActionListener, ItemListener{
         Cipher c = Cipher.getInstance(modo);
         Key key = new SecretKeySpec(keyValue,tipo);
         c.init(Cipher.DECRYPT_MODE, key);
-        byte[] decordedVal = new BASE64Decoder().decodeBuffer(main.jm.jTextArea4.getText());
+        
         byte[] decVal = c.doFinal(main.jm.jTextArea4.getText().getBytes());
+        
         String decryptedValue = new String(decVal);
         return decryptedValue;
     }
     
     private void encriptar() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException{
         String text = "";
-        byte[] keyValue = main.jm.jTextField2.getText().getBytes();
+        String stringKey = main.jm.jTextField2.getText();
+        byte[] keyValue = stringKey.getBytes();
+        
         if(main.jm.jTextArea4.getText() != null && !main.jm.jTextArea4.getText().equals("")){
+            String input = main.jm.jTextArea4.getText();
+            
             if(main.jm.jComboBox2.getSelectedIndex() == 0){
+                text = Caesar.Encrypt(input, Integer.parseInt(stringKey));
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 1){
+                text = Vigenere.Encrypt(input, stringKey);
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 2){
+                text = OneTimePad.Encrypt(input, stringKey);
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 3){
+                text = Playfair.Encrypt(input, stringKey);
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 4){
+                
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 0){
                 text = getEncript(keyValue, "DES/ECB/NoPadding", "DES");
@@ -160,17 +151,26 @@ public class ActionController implements ActionListener, ItemListener{
     
     private void decriptar() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException{
         String text = "";
-        byte[] keyValue = main.jm.jTextField2.getText().getBytes();
+        String stringKey = main.jm.jTextField2.getText();
+        byte[] keyValue = stringKey.getBytes();
+        
         if(main.jm.jTextArea4.getText() != null && !main.jm.jTextArea4.getText().equals("")){
-            if(main.jm.jComboBox2.getSelectedIndex() == 0){
+            String input = main.jm.jTextArea4.getText();
+            
+            if(main.jm.jComboBox2.getSelectedIndex() == 0){ // caesar
+                text = Caesar.Decrypt(input, Integer.parseInt(stringKey));
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 1){
+                text = Vigenere.Decrypt(input, stringKey);
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 2){
+                text = OneTimePad.Decrypt(input, stringKey);
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 3){
+                text = Playfair.Decrypt(input, stringKey);
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 4){
+                
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 0){
                 text = getDecript(keyValue, "DES/ECB/NoPadding", "DES");

@@ -3,15 +3,10 @@ package problema.pkg2.cliente;
 import java.io.*;
 import java.net.*;
 
-/**
- *
- * @author Leonardo
- */
 public class Client {
     private ObjectOutputStream output;
     private ObjectInputStream input;
     private Socket connection = null;
-    private String shipsData = "";
     
     //inicia a conexão
     public void startRunning(String ip){
@@ -42,16 +37,6 @@ public class Client {
         output.flush();
         //para receber os dados do outro computador
         input = new ObjectInputStream(connection.getInputStream());
-    }
-    
-    //salva os dados de inserção de cada navio
-    public void storeData(String shipsData){
-        this.shipsData += shipsData;
-    }
-    
-    //retorna os dados de cada navio
-    public String getStoredData(){
-        return shipsData;
     }
     
     //recebe os dados do Adversário

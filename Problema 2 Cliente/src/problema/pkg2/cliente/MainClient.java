@@ -21,7 +21,7 @@ public class MainClient extends javax.swing.JFrame {
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public MainClient() {
-        super("Batalha Naval");
+        super("Cripto");
         initComponents();
         jm = new JPanelMain();
         client = new Client();

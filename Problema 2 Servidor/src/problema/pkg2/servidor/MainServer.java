@@ -10,7 +10,7 @@ public class MainServer extends javax.swing.JFrame {
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public MainServer() {
-        super("Batalha Naval");
+        super("Cripto Server");
         initComponents();
         jm = new JPanelMain();
         server = new Server();
