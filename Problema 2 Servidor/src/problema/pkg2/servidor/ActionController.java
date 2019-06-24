@@ -20,8 +20,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import java.util.Base64;
 import problema.pkg2.servidor.ciphers.*;
 
 public class ActionController implements ActionListener, ItemListener{
@@ -92,7 +91,7 @@ public class ActionController implements ActionListener, ItemListener{
             }
             encVal = c.doFinal(main.jm.jTextArea4.getText().getBytes());
         }
-        String encryptedValue = new BASE64Encoder().encode(encVal);
+        String encryptedValue = Base64.getMimeEncoder().encodeToString(encVal);
         return encryptedValue;
     }
     
@@ -110,7 +109,7 @@ public class ActionController implements ActionListener, ItemListener{
                 String IV = "AAAAAAAAAAAAAAAA";
                 c.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
             }
-            byte[] decordedVal = new BASE64Decoder().decodeBuffer(main.jm.jTextArea4.getText());
+            byte[] decordedVal = Base64.getMimeDecoder().decode(main.jm.jTextArea4.getText());
             decVal = c.doFinal(decordedVal);
             decryptedValue = new String(decVal,"UTF-8");
         } else {
@@ -123,7 +122,7 @@ public class ActionController implements ActionListener, ItemListener{
                 IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
                 c.init(Cipher.DECRYPT_MODE, key, ivSpec);
             }
-            byte[] decordedVal = new BASE64Decoder().decodeBuffer(main.jm.jTextArea4.getText());
+            byte[] decordedVal = Base64.getMimeDecoder().decode(main.jm.jTextArea4.getText());
             decVal = c.doFinal(decordedVal);
             decryptedValue = new String(decVal);
         }
@@ -136,21 +135,22 @@ public class ActionController implements ActionListener, ItemListener{
         byte[] keyValue = stringKey.getBytes();
         
         if(main.jm.jTextArea4.getText() != null && !main.jm.jTextArea4.getText().equals("")){
-            String input = main.jm.jTextArea4.getText();
+            String input = Util.removeSpecialCharacters(main.jm.jTextArea4.getText());
             
             if(main.jm.jComboBox2.getSelectedIndex() == 0){
                 text = Caesar.Encrypt(input, Integer.parseInt(stringKey));
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 1){
-                text = Vigenere.Encrypt(input, stringKey);
+                text = Vigenere.Encrypt(input, Util.removeSpecialCharacters(stringKey));
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 2){
-                text = OneTimePad.Encrypt(input, stringKey);
+                text = OneTimePad.Encrypt(input, Util.removeSpecialCharacters(stringKey));
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 3){
-                text = Playfair.Encrypt(input, stringKey);
+                text = Playfair.Encrypt(input, Util.removeSpecialCharacters(stringKey));
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 4){
+                
                 
             } else if(main.jm.jComboBox2.getSelectedIndex() == 5 && main.jm.jComboBox1.getSelectedIndex() == 0){
                 text = getEncript(keyValue, "ECB", "DES");

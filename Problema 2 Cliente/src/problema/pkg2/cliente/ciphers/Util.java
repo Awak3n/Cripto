@@ -12,6 +12,6 @@ public class Util {
     }
     
     public static String removeSpecialCharacters(String text) {
-        return text.replaceAll("[^A-Z]", "");
+        return text.toUpperCase().replaceAll("[^A-Z]", "");
     }
 }

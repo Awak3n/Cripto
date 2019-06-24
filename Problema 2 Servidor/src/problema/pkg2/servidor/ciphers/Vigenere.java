@@ -9,6 +9,7 @@ public class Vigenere {
     public static String Encrypt(String text, String key) {
         String encryptedText = "";
         text = text.toUpperCase();
+        key = key.toUpperCase();
         
         for (int i = 0, j = 0; i < text.length(); i++) {
             char currentChar = text.charAt(i);
@@ -24,6 +25,7 @@ public class Vigenere {
     public static String Decrypt(String text, String key) {
         String encryptedText = "";
         text = text.toUpperCase();
+        key = key.toUpperCase();
         
         for (int i = 0, j = 0; i < text.length(); i++) {
             char c = text.charAt(i);
