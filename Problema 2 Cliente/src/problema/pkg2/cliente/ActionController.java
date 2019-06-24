@@ -21,7 +21,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Base64;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 import problema.pkg2.cliente.ciphers.*;
 
 public class ActionController implements ActionListener, ItemListener{
@@ -48,19 +49,11 @@ public class ActionController implements ActionListener, ItemListener{
                 encriptar();
             } catch (Exception ex) {
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchProviderException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvalidAlgorithmParameterException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if(e.getSource() == main.jm.jButton5){
             try {
                 decriptar();
             } catch (Exception ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchProviderException ex) {
-                Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvalidAlgorithmParameterException ex) {
                 Logger.getLogger(ActionController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
